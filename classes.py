@@ -3,6 +3,7 @@ import xml
 import xml.etree.ElementTree as ET
 
 SCHEDULE_DOMAIN = "http://xml.tab.co.nz/schedule/"
+ODDS_DOMAIN = "http://xml.tab.co.nz/odds"
 
 class Schedule:
     
@@ -54,13 +55,14 @@ class Meeting:
     def load_races(self):
         self.races = []
         for xml_race in self.xml_meeting.find('races').findall('race'):
-            race = Race(xml_race)
+            race = Race(self, xml_race)
             self.races.append(race)   
         
 class Race:
     
-    def __init__(self, xml_race):
+    def __init__(self, meeting, xml_race):
         self.xml_race = xml_race
+        self.meeting = meeting
     
         self.length = xml_race.find('length').text
         self.name = xml_race.find('name').text
@@ -76,12 +78,22 @@ class Race:
         self.weather = xml_race.find('weather').text
         
         self.load_entries()
+        self.load_odds()
         
     def load_entries(self):
         self.entries = []
         for xml_entry in self.xml_race.find('entries').findall('entry'):
             entry = Entry(xml_entry)
-            self.entries.append(entry)      
+            self.entries.append(entry)
+            
+    def load_odds(self):
+        odds_domain = '{}/{}/{}/{}'.format(ODDS_DOMAIN, self.date, self.meeting.number, self.number)
+        f = urllib.request.urlopen(odds_domain)
+        xml_content = f.read()
+        self.xml_odds = ET.fromstring(xml_content).find('meeting') .find('races').find('race')
+        
+        for i, xml_entry_odds in enumerate(self.xml_odds.find('entries').findall('entry')):
+            self.entries[i].load_entry_odds(xml_entry_odds)
     
         
 class Entry:
@@ -89,30 +101,39 @@ class Entry:
     def __init__(self, xml_entry):
         self.xml_entry = xml_entry
         
-        self.barrier = self.get_attrib('barrier')
+        self.barrier = self.get_attrib('barrier', 'int')
         self.jockey = self.get_attrib('jockey')
         self.name = self.get_attrib('name')
-        self.number = self.get_attrib('number')
-        self.scratched = self.get_attrib('scratched')
+        self.number = self.get_attrib('number', 'int')
+        self.scratched = self.get_attrib('scratched', 'bool')
         
     
-    def get_attrib(self, attrib, int_reqd=False):
+    def get_attrib(self, attrib, typ=None):
         try:
-            if int_reqd:
+            if typ == 'int':
                 return int(self.xml_entry.find(attrib).text)
+            elif typ == 'bool':
+                return self.xml_entry.find(attrib).text == 1
             else:
                 return self.xml_entry.find(attrib).text
         except:
             return None
-                
+    
+    def load_entry_odds(self, xml_entry_odds):
+        self.scratched = xml_entry_odds.get('scr') == 1
+        if not self.scratched:
+            self.odds_win = xml_entry_odds.get('win')
+            self.odds_plc = xml_entry_odds.get('plc')
+        
+           
         
         
 if __name__ == '__main__':
-    schedule = Schedule('2014-11-14', '3')
+    schedule = Schedule('2014-11-28', '3')
     for meeting in schedule.meetings:
         print('MEETING:', meeting.number)
         for race in meeting.races:
-            print('\tRACE:', race.number, race.name)
+            print('\tRACE',race.number, race.time, race.name)
             for entry in race.entries:
-                print('\t\t', entry.barrier, entry.name, entry.jockey)
+                print('\t\t', entry.number, entry.name, entry.jockey, entry.odds_win)
                 
