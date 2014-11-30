@@ -7,7 +7,7 @@ from repeated_timer import RepeatedTimer
 import random
 
 TITLE_TEMPLATE = '{name:^80}'
-TIME_TEMPLATE = '{time:^80}'
+TIME_TEMPLATE = '{time:^20}{meet_no:^20}{country:^20}{venue:^20}'
 STATS_TEMPLATE_1 = '{0[0]:^20}{0[1]:^20}{0[2]:^20}{0[3]:^20}\n{0[20]:^20}{0[21]:^20}{0[22]:^20}{0[23]:^20}\n{0[40]:^20}{0[41]:^20}{0[42]:^20}{0[43]:^20}\n\n'
 STATS_TEMPLATE_2 = '{0[4]:^20}{0[5]:^20}{0[6]:^20}{0[7]:^20}\n{0[24]:^20}{0[25]:^20}{0[26]:^20}{0[27]:^20}\n{0[44]:^20}{0[45]:^20}{0[46]:^20}{0[47]:^20}\n\n'
 STATS_TEMPLATE_3 = '{0[8]:^20}{0[9]:^20}{0[10]:^20}{0[11]:^20}\n{0[28]:^20}{0[29]:^20}{0[30]:^20}{0[31]:^20}\n{0[48]:^20}{0[49]:^20}{0[50]:^20}{0[51]:^20}\n\n'
@@ -73,11 +73,9 @@ class BettingDisplay():
             win_odds[i] = str(self.next_race.entries[i].odds_win)        
         
         lst = horse_nums + horse_names + win_odds
-        print(len(lst))
-        print(lst)
         odds_str = TEST_TEMPLATE.format(lst)
         title_str = TITLE_TEMPLATE.format(name=self.next_race.name)
-        dets_str = TIME_TEMPLATE.format(time=self.next_race.time)
+        dets_str = TIME_TEMPLATE.format(time=self.next_race.time, venue=self.next_race.meeting.venue, meet_no=self.next_race.meeting.number, country=self.next_race.meeting.country)
         self.title_var.set(title_str)
         self.dets_var.set(dets_str)
         self.odds_var.set(odds_str)        
@@ -91,10 +89,10 @@ class BettingDisplay():
         self.cur_race_name = StringVar()
         self.cur_race_time = StringVar()
         
-        self.title_text = Label(self.parent, textvariable=self.title_var, fg="white", bg="black", font=("Copperplate", 40, "bold"))
+        self.title_text = Label(self.parent, textvariable=self.title_var, fg="white", bg="black", font=("Courier", 40, "bold"))
         self.title_text.place(relx = 0.5, rely = 0, anchor=N, height = 80, width=1100)   
         
-        self.title_text = Label(self.parent, textvariable=self.dets_var, fg="white", bg="black", font=("Courier", 30, "bold"))
+        self.title_text = Label(self.parent, textvariable=self.dets_var, fg="white", bg="black", font=("Courier", 20, "bold"))
         self.title_text.place(relx = 0.5, y = 80, anchor=N, height = 30, width=1100)  
                
         
@@ -113,7 +111,15 @@ class BettingDisplay():
 if __name__ == '__main__':
     window = Tk()
     window.geometry("1100x800+30+30")
-    display = BettingDisplay(window, '6')
-    window.mainloop()
+    try:
+        meet_no = input('enter meeting no')
+        while not meet_no.isnumeric():
+            meet_no = input('enter meeting no')
+        display = BettingDisplay(window, meet_no)
+        window.mainloop()        
+    except:
+        print('error: no meeting found!')
+        
+
     
     
