@@ -1,12 +1,20 @@
 from tkinter import *
-from tkinter.ttk import *
+import tkinter.ttk
 import datetime
 import re
 from classes import Schedule, Meeting, Race, Entry
 from repeated_timer import RepeatedTimer
 import random
 
-TEST_TEMPLATE = '{name:^160}\n{time:^160}\n\n\n\t{0[0]}\t{0[1]}\t{0[2]}\t{0[3]}\t\t\n\t{0[4]}\t{0[5]}\t{0[6]}\t{0[7]}\t\t\n{0[8]}\t{0[10]}\t{0[11]}\t{0[11]}\t\t'
+TITLE_TEMPLATE = '{name:^80}'
+TIME_TEMPLATE = '{time:^80}'
+STATS_TEMPLATE_1 = '{0[0]:^20}{0[1]:^20}{0[2]:^20}{0[3]:^20}\n{0[20]:^20}{0[21]:^20}{0[22]:^20}{0[23]:^20}\n{0[40]:^20}{0[41]:^20}{0[42]:^20}{0[43]:^20}\n\n'
+STATS_TEMPLATE_2 = '{0[4]:^20}{0[5]:^20}{0[6]:^20}{0[7]:^20}\n{0[24]:^20}{0[25]:^20}{0[26]:^20}{0[27]:^20}\n{0[44]:^20}{0[45]:^20}{0[46]:^20}{0[47]:^20}\n\n'
+STATS_TEMPLATE_3 = '{0[8]:^20}{0[9]:^20}{0[10]:^20}{0[11]:^20}\n{0[28]:^20}{0[29]:^20}{0[30]:^20}{0[31]:^20}\n{0[48]:^20}{0[49]:^20}{0[50]:^20}{0[51]:^20}\n\n'
+STATS_TEMPLATE_4 = '{0[12]:^20}{0[13]:^20}{0[14]:^20}{0[15]:^20}\n{0[32]:^20}{0[33]:^20}{0[34]:^20}{0[35]:^20}\n{0[52]:^20}{0[53]:^20}{0[54]:^20}{0[55]:^20}\n\n'
+STATS_TEMPLATE_5 = '{0[16]:^20}{0[17]:^20}{0[18]:^20}{0[19]:^20}\n{0[36]:^20}{0[37]:^20}{0[38]:^20}{0[39]:^20}\n{0[56]:^20}{0[57]:^20}{0[58]:^20}{0[59]:^20}\n\n'
+
+TEST_TEMPLATE = STATS_TEMPLATE_1 + STATS_TEMPLATE_2 + STATS_TEMPLATE_3 + STATS_TEMPLATE_4 + STATS_TEMPLATE_5
 
 
 class BettingDisplay():
@@ -22,10 +30,11 @@ class BettingDisplay():
         self.next_race = None
         self.set_next_race()
         
-        self.test_var = StringVar()
+        self.odds_var = StringVar()
+        self.title_var = StringVar()
+        self.dets_var = StringVar()
         
         self.build_display()
-        #self.display_odds()
         self.start_timer()
         
         print(self.next_race.time)
@@ -51,35 +60,51 @@ class BettingDisplay():
         self.next_race.load_odds()
         
         #---TEMP---#
-        horse_nums = [entry.number for entry in self.next_race.entries][:4]
-        horse_names = [entry.name for entry in self.next_race.entries][:4]
-        win_odds = [entry.odds_win for entry in self.next_race.entries][:4]
+        horse_nums = ['']*20
+        for i in range(min(20, len(self.next_race.entries))):
+            horse_nums[i] = str(self.next_race.entries[i].number)
+            
+        horse_names = ['']*20
+        for i in range(min(20, len(self.next_race.entries))):
+            horse_names[i] = str(self.next_race.entries[i].name) 
+
+        win_odds = ['']*20
+        for i in range(min(20, len(self.next_race.entries))):
+            win_odds[i] = str(self.next_race.entries[i].odds_win)        
+        
         lst = horse_nums + horse_names + win_odds
-        out_str = TEST_TEMPLATE.format(lst, name=self.next_race.name, time=self.next_race.time)
+        print(len(lst))
+        print(lst)
+        odds_str = TEST_TEMPLATE.format(lst)
+        title_str = TITLE_TEMPLATE.format(name=self.next_race.name)
+        dets_str = TIME_TEMPLATE.format(time=self.next_race.time)
+        self.title_var.set(title_str)
+        self.dets_var.set(dets_str)
+        self.odds_var.set(odds_str)        
         
         #---TEMP END---#
               
         
-        self.test_var.set(out_str)
     
     def build_display(self):
+         #----TEMP----
+        self.cur_race_name = StringVar()
+        self.cur_race_time = StringVar()
         
-        self.cur_race_name = StringVar
-        self.cur_race_time = StringVar
+        self.title_text = Label(self.parent, textvariable=self.title_var, fg="white", bg="black", font=("Copperplate", 40, "bold"))
+        self.title_text.place(relx = 0.5, rely = 0, anchor=N, height = 80, width=1100)   
         
-        self.title_label = Label(self.parent, textvariable=self.test_var, tabs=('20c')
-        self.title_label.place(relx = 0.5, rely = 0, anchor=N)
+        self.title_text = Label(self.parent, textvariable=self.dets_var, fg="white", bg="black", font=("Courier", 30, "bold"))
+        self.title_text.place(relx = 0.5, y = 80, anchor=N, height = 30, width=1100)  
+               
         
+        self.title_text = Label(self.parent, textvariable=self.odds_var, fg="white", bg="black", font=("Courier", 20, "bold"))
+        self.title_text.place(relx = 0.5, y = 110, anchor=N, width=1100, height = 600)
+        
+
         self.quitbutton = Button(self.parent, text='quit', command=self.quitclick)
-        self.quitbutton.place(relx = 0.5, rely = 1, anchor=S)     
-            
-    #def display_odds(self):
-        #self.frame = Frame(self.parent)
-        #self.frame.pack()   
-        #self.label = Label(self.frame, textvariable=self.test_var)
-        #self.label.pack()        
-        #self.quitbutton = Button(self.frame, text='quit', command=self.quitclick)
-        #self.quitbutton.pack()
+        self.quitbutton.place(relx = 0.5, rely = 1, anchor=S) 
+        #---TEMP END ---#
     
     def quitclick(self):
         self.threading_timer.stop()
@@ -87,12 +112,8 @@ class BettingDisplay():
     
 if __name__ == '__main__':
     window = Tk()
-    window.geometry("500x200+30+30")
-    display = BettingDisplay(window, '2')
+    window.geometry("1100x800+30+30")
+    display = BettingDisplay(window, '6')
     window.mainloop()
     
     
-lst = ['1', '2', '3', '4', 'Test1', 'Test2', 'Test3', 'Test4', 1.1, 2.2, 3.3, 4.4]
-   
-str_test ='{0[0]:^20}\t{0[1]:^20}\t{0[2]:^20}\t{0[3]:^20}\n{0[4]:^20}\t{0[5]:^20}\t{0[6]:^20}\t{0[7]:^20}\n{0[8]:^20}\t{0[10]:^20}\t{0[11]:^20}\t{0[11]:^20}'.format(lst)
-
