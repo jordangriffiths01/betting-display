@@ -40,14 +40,14 @@ class Meeting:
     def __init__(self, xml_meeting):
         
         self.xml_meeting = xml_meeting
-        self.code = xml_meeting.find('code').text
+        #self.code = xml_meeting.find('code').text
         self.country = xml_meeting.find('country').text
         self.date = xml_meeting.find('date').text
         self.number = int(xml_meeting.find('number').text)
         self.name = xml_meeting.find('name').text
-        self.is_nz = xml_meeting.find('nz').text == '1'
-        self.status = xml_meeting.find('status').text
-        self.typ = xml_meeting.find('type').text
+        #self.is_nz = xml_meeting.find('nz').text == '1'
+        #self.status = xml_meeting.find('status').text
+        #self.typ = xml_meeting.find('type').text
         self.venue = xml_meeting.find('venue').text
         
         self.load_races()
@@ -64,7 +64,7 @@ class Race:
         self.xml_race = xml_race
         self.meeting = meeting
     
-        self.length = xml_race.find('length').text
+        #self.length = xml_race.find('length').text
         self.name = xml_race.find('name').text
         
         norm_time = xml_race.find('norm_time').text
@@ -73,10 +73,12 @@ class Race:
         
         self.number = int(xml_race.find('number').text)
         self.stake = xml_race.find('stake').text
-        self.status = xml_race.find('status').text
-        self.track_conditions = xml_race.find('track').text
-        self.weather = xml_race.find('weather').text
-        
+        #self.status = xml_race.find('status').text
+        #if xml_race.find('track'):
+            #self.track_conditions = xml_race.find('track').text
+        #if xml_race.find('weather'):
+            #self.weather = xml_race.find('weather').text
+    
         self.load_entries()
         self.load_odds()
         

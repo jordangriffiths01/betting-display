@@ -37,7 +37,7 @@ class BettingDisplay():
         self.build_display()
         self.start_timer()
         
-        print(self.next_race.time)
+        print("STARTED SUCCESSFULLY")
     
     def set_next_race(self):
         next_race = None
@@ -89,7 +89,7 @@ class BettingDisplay():
         self.cur_race_name = StringVar()
         self.cur_race_time = StringVar()
         
-        self.title_text = Label(self.parent, textvariable=self.title_var, fg="white", bg="black", font=("Courier", 40, "bold"))
+        self.title_text = Label(self.parent, fg="white", bg="black", font=("Courier", 40, "bold"), textvariable=self.title_var)
         self.title_text.place(relx = 0.5, rely = 0, anchor=N, height = 80, width=1100)   
         
         self.title_text = Label(self.parent, textvariable=self.dets_var, fg="white", bg="black", font=("Courier", 20, "bold"))
@@ -110,16 +110,10 @@ class BettingDisplay():
     
 if __name__ == '__main__':
     window = Tk()
-    window.geometry("1100x800+30+30")
-    try:
-        meet_no = input('enter meeting no')
-        while not meet_no.isnumeric():
-            meet_no = input('enter meeting no')
-        display = BettingDisplay(window, meet_no)
-        window.mainloop()        
-    except:
-        print('error: no meeting found!')
-        
+    window.geometry("1100x800+30+30")       
+    display = BettingDisplay(window, '4')
+    window.mainloop()        
+
 
     
     
