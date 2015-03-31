@@ -22,6 +22,7 @@ class BettingDisplay():
     def __init__(self, parent, meeting):
         
         self.parent = parent
+        self.display_type = 'odds'
     
         self.date = datetime.date.today().strftime("%Y-%m-%d") #Currently will need to be restarted each day
         self.meeting = meeting #PLACEHOLDER
@@ -56,31 +57,38 @@ class BettingDisplay():
         self.threading_timer.start() 
         
     def refresh(self):
-        self.set_next_race()
-        self.next_race.load_odds()
-        
-        #---TEMP---#
-        horse_nums = ['']*20
-        for i in range(min(20, len(self.next_race.entries))):
-            horse_nums[i] = str(self.next_race.entries[i].number)
+        if self.display_type == 'odds':
+            self.set_next_race()
+            self.next_race.load_odds()
             
-        horse_names = ['']*20
-        for i in range(min(20, len(self.next_race.entries))):
-            horse_names[i] = str(self.next_race.entries[i].name) 
-
-        win_odds = ['']*20
-        for i in range(min(20, len(self.next_race.entries))):
-            win_odds[i] = str(self.next_race.entries[i].odds_win)        
+            #---TEMP---#
+            horse_nums = ['']*20
+            for i in range(min(20, len(self.next_race.entries))):
+                horse_nums[i] = str(self.next_race.entries[i].number)
+                
+            horse_names = ['']*20
+            for i in range(min(20, len(self.next_race.entries))):
+                horse_names[i] = str(self.next_race.entries[i].name) 
+    
+            win_odds = ['']*20
+            for i in range(min(20, len(self.next_race.entries))):
+                win_odds[i] = str(self.next_race.entries[i].odds_win)        
+            
+            lst = horse_nums + horse_names + win_odds
+            odds_str = TEST_TEMPLATE.format(lst)
+            title_str = TITLE_TEMPLATE.format(name=self.next_race.name)
+            dets_str = TIME_TEMPLATE.format(time=self.next_race.time, venue=self.next_race.meeting.venue, meet_no=self.next_race.meeting.number, country=self.next_race.meeting.country)
+            self.title_var.set(title_str)
+            self.dets_var.set(dets_str)
+            self.odds_var.set(odds_str)        
+            
+            #---TEMP END---#
         
-        lst = horse_nums + horse_names + win_odds
-        odds_str = TEST_TEMPLATE.format(lst)
-        title_str = TITLE_TEMPLATE.format(name=self.next_race.name)
-        dets_str = TIME_TEMPLATE.format(time=self.next_race.time, venue=self.next_race.meeting.venue, meet_no=self.next_race.meeting.number, country=self.next_race.meeting.country)
-        self.title_var.set(title_str)
-        self.dets_var.set(dets_str)
-        self.odds_var.set(odds_str)        
-        
-        #---TEMP END---#
+        elif self.display_type == 'test':
+            self.title_var.set('test')
+            self.dets_var.set('')
+            self.odds_var.set('')
+            
               
         
     
@@ -92,12 +100,12 @@ class BettingDisplay():
         self.title_text = Label(self.parent, fg="white", bg="black", font=("Courier", 40, "bold"), textvariable=self.title_var)
         self.title_text.place(relx = 0.5, rely = 0, anchor=N, height = 80, width=1100)   
         
-        self.title_text = Label(self.parent, textvariable=self.dets_var, fg="white", bg="black", font=("Courier", 20, "bold"))
-        self.title_text.place(relx = 0.5, y = 80, anchor=N, height = 30, width=1100)  
+        self.dets_text = Label(self.parent, textvariable=self.dets_var, fg="white", bg="black", font=("Courier", 20, "bold"))
+        self.dets_text.place(relx = 0.5, y = 80, anchor=N, height = 30, width=1100)  
                
         
-        self.title_text = Label(self.parent, textvariable=self.odds_var, fg="white", bg="black", font=("Courier", 20, "bold"))
-        self.title_text.place(relx = 0.5, y = 110, anchor=N, width=1100, height = 600)
+        self.odds_text = Label(self.parent, textvariable=self.odds_var, fg="white", bg="black", font=("Courier", 20, "bold"))
+        self.odds_text.place(relx = 0.5, y = 110, anchor=N, width=1100, height = 600)
         
 
         self.quitbutton = Button(self.parent, text='quit', command=self.quitclick)
@@ -109,11 +117,36 @@ class BettingDisplay():
         self.parent.destroy()
     
 if __name__ == '__main__':
+    
+    
+    
+    
     window = Tk()
     window.geometry("1100x800+30+30")       
-    display = BettingDisplay(window, '4')
-    window.mainloop()        
+    display = BettingDisplay(window, '3')
 
+    
+    def toggle_display():
+        if display.display_type == 'odds':
+            
+            display.display_type = 'test'
+            print(display.display_type)
+        else:
+            display.display_type = 'odds'
+        display.refresh()
+        
+
+    manager = Toplevel(window)
+    manager.geometry("200x200+0+0")
+    toggle_button = Button(manager, text='toggle', command=toggle_display)
+    toggle_button.pack()
+    
+    window.mainloop()
+    
+    
+
+    
+ 
 
     
     
