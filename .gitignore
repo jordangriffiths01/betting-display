@@ -1,6 +1,3 @@
 *.pyc
-<<<<<<< HEAD
 __pycache__/
-=======
 *.gif
->>>>>>> FETCH_HEAD
